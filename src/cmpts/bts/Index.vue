@@ -6,13 +6,14 @@
     </div>
 </template>
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, nextTick } from 'vue';
 import { drawBase as initBts } from './draw-base';
 import { drawData } from './draw-data';
 import type { ZRenderType } from 'zrender';
+import { tmpData } from '@/assets/mock/index.js';
 
 const bts_conf = ref({
-    title: '红河州第一人民医院体温单',
+    title: 'XXXX医院体温单',
     line_w: 1,
     line_bold_w: 2,
     x_count: 48,
@@ -32,7 +33,9 @@ const rfsPage = async () => {
     drawData(bts_conf.value.cvs as ZRenderType, bts_conf.value);
 };
 
-onMounted(() => {
+onMounted(async () => {
+    await nextTick();
+    console.log(tmpData);
     rfsPage();
 });
 </script>
