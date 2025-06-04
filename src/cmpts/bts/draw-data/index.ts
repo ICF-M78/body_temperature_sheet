@@ -1,52 +1,31 @@
 import type { ZRenderType } from 'zrender';
-import { cross, circle, line, polygon, text } from './draw-tools';
+import { circle, cross, line, polygon, text } from '../draw-tools/index';
+import { parseBtsData } from './parse-bts-data';
 
 // config
 let c = {} as BtsConf;
 const font_size = 14;
 
-/** @description 画数据 */
-export const drawData = (cvs: ZRenderType, conf: BtsConf) => {
-    let date_ls = [
-        '2024-01-02',
-        '2024-01-03',
-        '2024-01-04',
-        '2024-01-05',
-        '2024-01-06',
-        '2024-01-07',
-        '2024-01-08',
-    ];
-    let in_hosp_day_ls = [1, 2, 3, 4, 5, 6, 7];
-    // 体温
-    let bt_ls = [
-        36.6, 37.0, 37.5, 36.8, 38.1, 39.0, 37.2, 37.3, 36.9, 38.5, 37.8, 36.7, 39.5, 37.1, 36.8,
-        38.0, 40.0, 36.5, 37.4, 0, 36.6, 38.2, 37.0, 0, 39.2, 36.7, 38.3, 0, 37.6, 36.9, 37.7, 38.4,
-        0, 36.8, 39.1, 37.5, 38.6, 0, 37.3, 0, 0, 36.6, 0,
-    ];
-    // 物理降温
-    let down_bt_ls = [
-        0, 0, 0, 0, 0, 36.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 36.5, 0, 0, 0, 0, 0, 0, 0, 0, 36, 0, 0, 0,
-        36.5, 0, 0, 0, 0, 0, 36.5, 0, 0, 0, 0, 0,
-    ];
-    // 脉搏
-    let p_ls = [
-        72, 0, 85, 90, 0, 95, 67, 78, 0, 88, 72, 80, 0, 92, 0, 74, 88, 82, 0, 65, 78, 0, 0, 70, 0,
-        0, 90, 0, 86, 0, 77, 0, 84, 0, 91, 79, 0, 87, 0, 82, 0, 0,
-    ];
-    // 心率
-    let hr_ls = [
-        72, 0, 85, 90, 0, 95, 67, 78, 0, 88, 72, 80, 0, 92, 0, 74, 88, 82, 0, 65, 78, 0, 0, 70, 0,
-        0, 90, 0, 86, 0, 77, 0, 84, 0, 91, 79, 0, 87, 0, 82, 0, 0,
-    ];
-    // 疼痛评分
-    let pain_ls = [
-        0, 0, 7, 0, 0, 3, 8, 0, 6, 0, 2, 0, 0, 5, 1, 0, 0, 4, 0, 9, 10, 0, 0, 0, 8, 0, 6, 0, 3, 0,
-        0, 7, 0, 2, 0, 0, 4, 1, 0, 5,
-    ];
-
+// 绘制体温单数据图表
+// @param cvs - zrender画布实例
+// @param conf - 配置参数，包含单位长度等信息
+// @param data - 体温单数据，包含7天的数据，每天6个时间段
+export const drawData = (cvs: ZRenderType, conf: BtsConf, data: BtsData) => {
     c = conf;
+
+    // 解析数据
+    const {
+        dateList,
+        daysInHospital,
+        temperatureList,
+        physicalCoolingList,
+        pulseList,
+        heartRateList,
+        painScoreList,
+    } = parseBtsData(data);
+
     // 换算成坐标
-    bt_ls = bt_ls.map(val => {
+    const temperatureXList = temperatureList.map(val => {
         if (val) {
             return 51 * c.unit - ((val - 34) / 0.2) * c.unit;
         } else {
@@ -55,51 +34,38 @@ export const drawData = (cvs: ZRenderType, conf: BtsConf) => {
     });
     drawDataLine(
         cvs,
-        bt_ls,
-        (p: Point) => {
-            // 体温：画蓝色的叉
-            // const cross_line_arr = cross(
-            //     {
-            //         x: p.x,
-            //         y: p.y,
-            //     },
-            //     {
-            //         stroke: 'blue',
-            //         lineWidth: 2,
-            //     },
-            //     3
-            // );
-            // for (const line of cross_line_arr) {
-            //     cvs.add(line);
-            // }
-            // 体温：画蓝色的圆
-            cvs.add(
-                circle(
-                    {
-                        x: p.x,
-                        y: p.y,
-                    },
-                    4,
-                    {
-                        stroke: 'blue',
-                        lineWidth: 1,
-                        fill: 'blue',
-                    }
-                )
+        temperatureXList,
+        temperatureList,
+        (p: Point, value: number) => {
+            const cross_line_arr = cross(
+                {
+                    x: p.x,
+                    y: p.y,
+                },
+                {
+                    stroke: 'blue',
+                    lineWidth: 3,
+                },
+                5,
+                2,
+                `体温：${value}℃`
             );
+            for (const line of cross_line_arr) {
+                cvs.add(line);
+            }
         },
         'blue'
     );
 
-    down_bt_ls = down_bt_ls.map(val => {
+    const physicalCoolingXList = physicalCoolingList.map(val => {
         if (val) {
             return 51 * c.unit - ((val - 34) / 0.2) * c.unit;
         } else {
             return 0;
         }
     });
-    drawDownBt(cvs, down_bt_ls, bt_ls);
-    drawPoint(cvs, down_bt_ls, (p: Point) => {
+    drawDownBt(cvs, physicalCoolingXList, temperatureXList);
+    drawCenterFlag(cvs, physicalCoolingXList, physicalCoolingList, (p: Point) => {
         cvs.add(
             circle(
                 {
@@ -116,7 +82,7 @@ export const drawData = (cvs: ZRenderType, conf: BtsConf) => {
         );
     });
 
-    hr_ls = hr_ls.map(val => {
+    const hrXList = heartRateList.map(val => {
         if (val) {
             return 51 * c.unit - ((val - 20) / 5) * c.unit;
         } else {
@@ -125,7 +91,8 @@ export const drawData = (cvs: ZRenderType, conf: BtsConf) => {
     });
     drawDataLine(
         cvs,
-        hr_ls,
+        hrXList,
+        heartRateList,
         (p: Point) => {
             cvs.add(
                 circle(
@@ -145,7 +112,7 @@ export const drawData = (cvs: ZRenderType, conf: BtsConf) => {
         'red'
     );
 
-    p_ls = p_ls.map(val => {
+    const pulseXList = pulseList.map(val => {
         if (val) {
             return 51 * c.unit - ((val - 20) / 5) * c.unit;
         } else {
@@ -154,7 +121,8 @@ export const drawData = (cvs: ZRenderType, conf: BtsConf) => {
     });
     drawDataLine(
         cvs,
-        p_ls,
+        pulseXList,
+        pulseList,
         (p: Point) => {
             cvs.add(
                 circle(
@@ -174,7 +142,7 @@ export const drawData = (cvs: ZRenderType, conf: BtsConf) => {
         'red'
     );
     // 疼痛评分
-    pain_ls = pain_ls.map(val => {
+    const painScoreXList = painScoreList.map(val => {
         if (val) {
             return 11 * c.unit - (val / 2) * c.unit;
         } else {
@@ -183,8 +151,9 @@ export const drawData = (cvs: ZRenderType, conf: BtsConf) => {
     });
     drawDataLine(
         cvs,
-        pain_ls,
-        (p: Point) => {
+        painScoreXList,
+        painScoreList,
+        (p: Point, value: number) => {
             cvs.add(
                 circle(
                     {
@@ -196,27 +165,32 @@ export const drawData = (cvs: ZRenderType, conf: BtsConf) => {
                         stroke: 'black',
                         lineWidth: 1,
                         fill: 'black',
-                    }
+                    },
+                    2,
+                    `评分：${value}`
                 )
             );
         },
         'black'
     );
     // 画日期
-    date_ls.forEach((date, index) => {
+    dateList.forEach((date, index) => {
         const x = 6 * c.unit + index * (6 * c.unit) + c.unit;
         const y = (c.unit - font_size) / 2;
         cvs.add(text({ x: x, y: y }, date, { textFill: 'black', fontSize: font_size }));
     });
     // 画住院天数
-    in_hosp_day_ls.forEach((day, index) => {
+    daysInHospital.forEach((day, index) => {
         const x = 6 * c.unit + index * (6 * c.unit) + c.unit * 2 + (2 * c.unit - font_size) / 2;
         const y = c.unit + (c.unit - font_size) / 2;
         cvs.add(text({ x: x, y: y }, day.toString(), { textFill: 'black', fontSize: font_size }));
     });
 };
 
-/** @description 脉搏和心率之间的阴影 */
+// 绘制脉搏和心率之间的阴影区域
+// @param cvs - zrender画布实例
+// @param p_ls - 脉搏数据数组（已转换为坐标值）
+// @param hr_ls - 心率数据数组（已转换为坐标值）
 const drawPHrShadow = (cvs: ZRenderType, p_ls: number[], hr_ls: number[]) => {
     var point_ls = [] as Point[];
     for (let index = 0; index < p_ls.length; index++) {
@@ -238,11 +212,13 @@ const drawPHrShadow = (cvs: ZRenderType, p_ls: number[], hr_ls: number[]) => {
         fill: 'rgba(235, 76, 153, 0.4)',
         stroke: 'red',
     });
-    // _polygon.animate('shape', false).when(1000, { points: point_ls }).start();
     cvs.add(_polygon);
 };
 
-/** @description 物理降温 */
+// 绘制物理降温连接线
+// @param cvs - zrender画布实例
+// @param down_ls - 物理降温数据数组（已转换为坐标值）
+// @param ls - 体温数据数组（已转换为坐标值）
 const drawDownBt = (cvs: ZRenderType, down_ls: number[], ls: number[]) => {
     for (let index = 0; index < down_ls.length; index++) {
         const val = down_ls[index];
@@ -283,10 +259,19 @@ const drawDownBt = (cvs: ZRenderType, down_ls: number[], ls: number[]) => {
     }
 };
 
-// 只是画点
-const drawPoint = (cvs: ZRenderType, _ls: number[], drawFunc: Function) => {
+// 绘制数据点标志
+// @param cvs - zrender画布实例
+// @param _ls - 数据数组（已转换为坐标值）
+// @param drawFunc - 绘制函数，用于自定义点的样式
+// @returns 数据点坐标数组
+const drawCenterFlag = (
+    cvs: ZRenderType,
+    xList: number[],
+    valueList: number[],
+    drawFunc: Function
+) => {
     const point_ls = [] as Point[];
-    _ls.forEach((val, index) => {
+    xList.forEach((val, index) => {
         if (!val) {
             return;
         }
@@ -296,16 +281,26 @@ const drawPoint = (cvs: ZRenderType, _ls: number[], drawFunc: Function) => {
             x: x,
             y: y,
         } as Point;
-        drawFunc(p);
+        drawFunc(p, valueList[index]);
         point_ls.push(p);
     });
     return point_ls;
 };
 
-// 画数据折线
-const drawDataLine = (cvs: ZRenderType, _ls: number[], drawFunc: Function, line_color: string) => {
+// 绘制数据折线
+// @param cvs - zrender画布实例
+// @param _ls - 数据数组（已转换为坐标值）
+// @param drawFunc - 绘制函数，用于自定义点的样式
+// @param line_color - 线条颜色
+const drawDataLine = (
+    cvs: ZRenderType,
+    xList: number[],
+    valueList: number[],
+    drawFunc: Function,
+    line_color: string
+) => {
     // 画点
-    const point_ls = drawPoint(cvs, _ls, drawFunc);
+    const point_ls = drawCenterFlag(cvs, xList, valueList, drawFunc);
 
     // 画线
     for (let index = 0; index < point_ls.length - 1; index++) {

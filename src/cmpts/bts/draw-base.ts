@@ -1,5 +1,5 @@
 import type { ZRenderType } from 'zrender';
-import { initCvs, line, text } from './draw-tools';
+import { initCvs, line, text } from './draw-tools/index';
 
 // config
 let c = {} as BtsConf;
@@ -10,12 +10,12 @@ const drawHorizontalLine = (cvs: ZRenderType) => {
     const cvs_w = cvs.dom!.clientWidth;
     for (let index = 0; index < c.y_count; index++) {
         // TODO 辅助文字
-        cvs.add(
-            text({ x: 0, y: c.unit * index }, index.toString(), {
-                textFill: 'green',
-                fontSize: 6,
-            })
-        );
+        // cvs.add(
+        //     text({ x: 0, y: c.unit * index }, index.toString(), {
+        //         textFill: 'green',
+        //         fontSize: 6,
+        //     })
+        // );
         const y = c.unit * index;
         const x2 = cvs_w;
         if (index < 5) {
@@ -24,7 +24,7 @@ const drawHorizontalLine = (cvs: ZRenderType) => {
                 { x: 0, y },
                 {
                     stroke: 'black',
-                    lineWidth: c.line_w,
+                    lineWidth: c.lineWidth,
                 }
             );
             cvs.add(_line);
@@ -45,7 +45,7 @@ const drawHorizontalLine = (cvs: ZRenderType) => {
                 { x: c.unit * 6, y },
                 {
                     stroke: 'black',
-                    lineWidth: c.line_bold_w,
+                    lineWidth: c.lineBold,
                 }
             );
             cvs.add(_line);
@@ -64,7 +64,7 @@ const drawHorizontalLine = (cvs: ZRenderType) => {
                 { x: 0, y },
                 {
                     stroke: 'black',
-                    lineWidth: c.line_bold_w,
+                    lineWidth: c.lineBold,
                 }
             );
             cvs.add(_line);
@@ -83,7 +83,7 @@ const drawHorizontalLine = (cvs: ZRenderType) => {
                 { x: c.unit * 6, y },
                 {
                     stroke: 'black',
-                    lineWidth: c.line_bold_w,
+                    lineWidth: c.lineBold,
                 }
             );
             cvs.add(_line);
@@ -106,7 +106,7 @@ const drawHorizontalLine = (cvs: ZRenderType) => {
                     { x: 0, y },
                     {
                         stroke: 'black',
-                        lineWidth: c.line_w,
+                        lineWidth: c.lineWidth,
                     }
                 );
                 cvs.add(_line);
@@ -123,7 +123,7 @@ const drawHorizontalLine = (cvs: ZRenderType) => {
                     { x: c.unit * 6, y },
                     {
                         stroke: 'black',
-                        lineWidth: c.line_w,
+                        lineWidth: c.lineWidth,
                     }
                 );
                 cvs.add(_line);
@@ -145,7 +145,7 @@ const drawHorizontalLine = (cvs: ZRenderType) => {
         { x: c.unit * 6, y: c.unit * 7.5 },
         {
             stroke: 'red',
-            lineWidth: c.line_bold_w,
+            lineWidth: c.lineBold,
         }
     );
     pain_line
@@ -163,7 +163,7 @@ const drawHorizontalLine = (cvs: ZRenderType) => {
         { x: c.unit * 6, y: c.unit * 36 },
         {
             stroke: 'red',
-            lineWidth: c.line_bold_w,
+            lineWidth: c.lineBold,
         }
     );
     fever_line
@@ -182,12 +182,12 @@ const drawVerticalLine = (cvs: ZRenderType) => {
     const cvs_h = cvs.dom!.clientHeight;
     for (let index = 0; index < c.x_count; index++) {
         // TODO 辅助文字
-        cvs.add(
-            text({ x: c.unit * index, y: 0 }, index.toString(), {
-                textFill: 'green',
-                fontSize: 6,
-            })
-        );
+        // cvs.add(
+        //     text({ x: c.unit * index, y: 0 }, index.toString(), {
+        //         textFill: 'green',
+        //         fontSize: 6,
+        //     })
+        // );
 
         if (index < 6) {
             continue;
@@ -195,11 +195,11 @@ const drawVerticalLine = (cvs: ZRenderType) => {
         const x = c.unit * index;
         let y1 = c.unit * 5;
         let y2 = cvs_h;
-        let _line_w = c.line_w;
+        let _line_w = c.lineWidth;
         let color = 'black';
         if (index % 6 === 0) {
             y1 = 0;
-            _line_w = c.line_w;
+            _line_w = c.lineWidth;
             if (index === 6) {
                 color = 'black';
             } else {
@@ -401,7 +401,7 @@ const drawBorder = (cvs: ZRenderType) => {
         },
         {
             stroke: 'black',
-            lineWidth: c.line_bold_w * 2,
+            lineWidth: c.lineBold * 2,
         }
     );
     cvs.add(line1);
@@ -424,7 +424,7 @@ const drawBorder = (cvs: ZRenderType) => {
         },
         {
             stroke: 'black',
-            lineWidth: c.line_bold_w * 2,
+            lineWidth: c.lineBold * 2,
         }
     );
     cvs.add(line2);
@@ -447,7 +447,7 @@ const drawBorder = (cvs: ZRenderType) => {
         },
         {
             stroke: 'black',
-            lineWidth: c.line_bold_w * 2,
+            lineWidth: c.lineBold * 2,
         }
     );
     cvs.add(line3);
@@ -471,7 +471,7 @@ const drawBorder = (cvs: ZRenderType) => {
         },
         {
             stroke: 'black',
-            lineWidth: c.line_bold_w * 2,
+            lineWidth: c.lineBold * 2,
         }
     );
     cvs.add(line4);

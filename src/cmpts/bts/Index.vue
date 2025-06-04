@@ -8,14 +8,14 @@
 <script lang="ts" setup>
 import { onMounted, ref, nextTick } from 'vue';
 import { drawBase as initBts } from './draw-base';
-import { drawData } from './draw-data';
+import { drawData } from './draw-data/index';
 import type { ZRenderType } from 'zrender';
-import { tmpData } from '@/assets/mock/index.js';
+import { btsData } from '@/assets/mock/index.js';
 
 const bts_conf = ref({
-    title: 'XXXX医院体温单',
-    line_w: 1,
-    line_bold_w: 2,
+    title: '红河州第一人民医院体温单',
+    lineWidth: 1,
+    lineBold: 2,
     x_count: 48,
     y_count: 64,
     cvs: undefined,
@@ -28,14 +28,13 @@ const cvs_ref = ref(null as null | HTMLCanvasElement);
 const rfsPage = async () => {
     // 初始化体温单
     bts_conf.value.cvs = initBts(cvs_ref.value as HTMLCanvasElement, bts_conf.value);
-    // 请求数据
     // 画数据
-    drawData(bts_conf.value.cvs as ZRenderType, bts_conf.value);
+    drawData(bts_conf.value.cvs as ZRenderType, bts_conf.value,btsData);
 };
 
 onMounted(async () => {
     await nextTick();
-    console.log(tmpData);
+    console.log(btsData);
     rfsPage();
 });
 </script>
