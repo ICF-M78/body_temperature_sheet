@@ -13,7 +13,7 @@ import type { ZRenderType } from 'zrender';
 import { btsData } from '@/assets/mock/index.js';
 
 const bts_conf = ref({
-    title: '红河州第一人民医院体温单',
+    title: 'XXX人民医院体温单',
     lineWidth: 1,
     lineBold: 2,
     x_count: 48,
@@ -29,7 +29,7 @@ const rfsPage = async () => {
     // 初始化体温单
     bts_conf.value.cvs = initBts(cvs_ref.value as HTMLCanvasElement, bts_conf.value);
     // 画数据
-    drawData(bts_conf.value.cvs as ZRenderType, bts_conf.value,btsData);
+    drawData(bts_conf.value.cvs as ZRenderType, bts_conf.value, btsData);
 };
 
 onMounted(async () => {
